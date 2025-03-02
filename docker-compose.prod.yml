@@ -1,0 +1,34 @@
+# Production deployment for Kenyan market
+version: '3.8'
+
+services:
+  backend:
+    image: betsawa-backend:1.0
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${PROD_DB_USER}:${PROD_DB_PASS}@db-prod:5432/betsawa
+      - MPESA_CALLBACK_URL=https://api.betsawa.ke/mpesa-callback
+    deploy:
+      replicas: 4
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  frontend:
+    image: betsawa-frontend:1.0
+    environment:
+      - REACT_APP_API_ENDPOINT=https://api.betsawa.ke
+    deploy:
+      replicas: 3
+
+  db-prod:
+    image: postgres:15
+    volumes:
+      - pgdata-prod:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${PROD_DB_USER}
+      - POSTGRES_PASSWORD=${PROD_DB_PASS}
+
+volumes:
+  pgdata-prod:
